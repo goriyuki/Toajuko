@@ -1,3 +1,5 @@
+#用于从https://www.chemradar.com/tools/cis/inv/648fb470e7fff39f78795ebc?爬取数据
+
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -25,16 +27,7 @@ df = pd.read_excel(file_path)
 
 # 请求头和 Cookies（替换为网站返回的）
 cookies = {
-    "_ga": "GA1.1.2057926842.1746510909",
-    "Hm_lvt_a1d0f0c9d026288815259fdf6f92f91d": "1746510909,1746537783",
-    "HMACCOUNT": "C0AD7D62D74CA1E8",
-    "finger_id": "1301946066",
-    "_clck": "1hve4rs|2|fvo|0|1952",
-    "login_back": "/tools/cis/inv/648fb470e7fff39f78795ebc",
-    "chem-radar-user": "SJL4xO-zB9nmLOeHfDWGtsr7taWJOxelpGo19O5MvVKacK7oohLvAwpesKcN-59xXi3t1QMp8CYEwSigHsaImq-uXhXYUBpCo8tqCpB71DFB6X3lgJ5OT8dJMULOFTgDPgA9H1l_fzfLDHeksK_YuWnud1e6WKq3WToEykUb1-aotZktzG6c2LJqk_Jledh9jp7DeMGXcFx6z2a7smqkUw%253D%253D",
-    "Hm_lpvt_a1d0f0c9d026288815259fdf6f92f91d": "1746537802",
-    "_clsk": "7t6edw|1746537803350|1|1|b.clarity.ms/collect",
-    "_ga_63ND4CKLDG": "GS2.1.s1746537782$o3$g1$t1746537821$j0$l0$h0"
+
 }
 
 headers = {
