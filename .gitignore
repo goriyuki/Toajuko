@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments and secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Notebooks and editors
+.ipynb_checkpoints/
+.idea/
+.vscode/
+
+# Local data and generated outputs
+data/raw/
+data/private/
+outputs/
+*.xlsx
+*.xls
+*.csv
+*.db
+*.sqlite*
+
+# OS files
+.DS_Store
+Thumbs.db
