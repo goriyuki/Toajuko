@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from decimal import Decimal, getcontext
 from collections import deque
 import time
+import os
 
 plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
@@ -19,13 +20,27 @@ JACCARD_THRESHOLD = Decimal('0.5')
 WEIGHT_STRATEGY = 'importance'
 TOP_N = 30
 
-conn = pyodbc.connect(
-    "DRIVER={ODBC Driver 17 for SQL Server};"
-    "SERVER=192.168.1.10;"
-    "DATABASE=Testapi;"
-    "UID=sa;"
-    "PWD=1227;"
-)
+def get_database_connection():
+    """Create a database connection from environment variables."""
+    variable_names = {
+        "server": "FORMULA_DB_SERVER",
+        "database": "FORMULA_DB_NAME",
+        "user": "FORMULA_DB_USER",
+        "password": "FORMULA_DB_PASSWORD",
+    }
+    missing = [name for name in variable_names.values() if not os.getenv(name)]
+    if missing:
+        raise RuntimeError(
+            "Missing required environment variables: " + ", ".join(missing)
+        )
+
+    return pyodbc.connect(
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        f"SERVER={os.environ[variable_names['server']]};"
+        f"DATABASE={os.environ[variable_names['database']]};"
+        f"UID={os.environ[variable_names['user']]};"
+        f"PWD={os.environ[variable_names['password']]};"
+    )
 
 def preprocess_uploaded_formula(file_path):
     df = pd.read_excel(file_path, engine='openpyxl')
@@ -45,7 +60,7 @@ def preprocess_uploaded_formula(file_path):
 
     return {rm: val for rm, val in zip(df['RMCode'], df['FID_percent'])}
 
-def load_database_formulas():
+def load_database_formulas(conn):
     star_timer = time.time()
     cursor = conn.cursor()
     cursor.execute(" SELECT b.RMCode, b.FID_percent,a.id,a.filename  FROM [00000_UploadedFormulas] a Left join [00000_FormulaDetails] b ON a.id = b.formula_id order by formula_id")
@@ -194,7 +209,8 @@ def print_results(results):
 if __name__ == "__main__":
     print("读取配方数据...")
     uploaded_vector = preprocess_uploaded_formula(excel_file)
-    database_vectors, filenames = load_database_formulas()
+    with get_database_connection() as conn:
+        database_vectors, filenames = load_database_formulas(conn)
 
     print("执行两步筛选匹配...")
     results = find_similar_formulas(
@@ -208,10 +224,11 @@ if __name__ == "__main__":
         print(f"找到 {len(results)} 个相似配方")
         print_results(results)
 
-        best_match = results[1]
+        best_match = results[0]
         print(f"\n最佳匹配：{best_match['filename']} (相似度: {best_match['similarity_score']:.4f})")
 
         plot_comparison(uploaded_vector, best_match['db_vector'], best_match['filename'])
         visualize_jaccard_difference(uploaded_vector, best_match['db_vector'], best_match['filename'])
     else:
         print("未找到满足条件的相似配方，请降低杰卡德阈值")
+
